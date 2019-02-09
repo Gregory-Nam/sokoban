@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>TD1 JAVASCRIPT</title>
+        <script src="jquery-3.3.1.js"></script>
+        <script src="level.js"></script>
+        <script>
+
+            $(document).ready(function(){
+                $('body').append(
+                    $("<div />").attr('id','level')
+                );
+                class Tableau {
+                    constructor(niveau, destination){
+                        this.niveau = niveau;
+                        this.destination = destination;
+                        this.hauteur = this.niveau.length;
+                        // this.x = 0;
+                        // this.y= 0;
+                    }
+
+                    creationTableau(){
+
+                        let montableau = $("<div />").attr('id','letab');
+
+                        montableau.appendTo(this.destination);
+
+                        for(let i = 0; i < this.hauteur; i++)
+                        {
+                            let maligne = $("<div />");
+                            maligne.appendTo(montableau);
+
+                            //TRAITEMENT DES CASES
+                            for(let o = 0; o < this.niveau[i].length; o++) {
+                                let macellule = $("<div />");
+                                if(this.niveau[i][o] === '@'){
+                                    // macellule.attr('id', 'moi');
+                                    macellule.attr({
+                                        'data-row':i,
+                                        'data-col':o,
+                                        'data-type':'me'
+                                    });
+                                }
+                                else if(this.niveau[i][o] === '$')
+                                {
+                                    macellule.attr({
+                                        'data-row':i,
+                                        'data-col':o,
+                                        'data-type':'rock'
+                                    });
+                                }
+                                else if(this.niveau[i][o] === '.')
+                                {
+                                    macellule.attr({
+                                        'data-row':i,
+                                        'data-col':o,
+                                        'data-type':'destination'
+                                    });
+                                }
+                                else if(this.niveau[i][o] === '#'){
+                                    macellule.attr({
+                                        'data-row':i,
+                                        'data-col':o,
+                                        'data-type':'wall'
+                                    });
+                                }
+                                else{
+                                    macellule.attr({
+                                        'data-row':i,
+                                        'data-col':o,
+                                        'data-type':'nothing'
+                                    });
+                                }
+                                macellule.append(this.niveau[i][o]).css({
+                                    'background-color': 'black',
+                                    'color': 'white',
+                                    'text-align': 'center',
+                                    'vertical-align' : 'middle',
+                                    'display': 'inline-block',
+                                    'margin' : '0',
+                                    'padding' : '0',
+                                    'width' : '40px',
+                                    'height' : '40px',
+                                    'border' : 'red 5px solid'
+                                });
+                                //macellule.appendTo(maligne);
+                                maligne.append(macellule);
+                            }
+
+                        }
+                    }
+
+                    isRock(destination)
+                    {
+                        return destination.attr('data-type') === 'rock';
+                    }
+
+                    isNothing(destination)
+                    {
+                        return destination.attr('data-type') === 'nothing';
+                    }
+
+
+
+                    move(current, destination, direction)
+                    {
+                        if(this.isNothing(destination))
+                        {
+                            destination.html(current.html()).attr('data-type',current.attr('data-type'));
+
+                            current.attr('data-type','nothing').html("");
+                        }
+                        else if(this.isRock(destination))
+                        {
+
+                            let nextcase = this.getNextCase(direction,this.getXcase(destination),this.getyCase(destination));
+                            console.log(nextcase);
+                            if(this.isNothing(nextcase))
+                            {
+                                this.move(destination,nextcase,direction);
+                                destination.html(current.html()).attr('data-type',current.attr('data-type'));
+                                current.attr('data-type','nothing').html("");
+
+
+
+                            }
+                        }
+
+                    }
+
+                    getNextCase(direction,x, y) {
+                        //CASE DESTINATION
+                        let go;
+                        switch (direction) {
+                            case('z'):
+                                go = $(`*[data-col=${x}][data-row=${--y}]`);
+                                break;
+                            case('s'):
+                                go = $(`*[data-col=${x}][data-row=${++y}]`);
+                                break;
+                            case('d'):
+                                go = $(`*[data-col=${++x}][data-row=${y}]`);
+                                break;
+                            case('q'):
+                                go = $(`*[data-col=${--x}][data-row=${y}]`);
+                                break;
+                        }
+                        return go;
+                    }
+                    getXcase(cell){
+                        return cell.attr('data-col');
+                    }
+
+                    getyCase(cell){
+                        return cell.attr('data-row');
+                    }
+
+                    modifierTab(direction){
+                        console.log(direction);
+                        //LA DIV CONTENANT @
+                        let me = $('*[data-type="me"]');
+                        //COLONNE DU @
+                        let x = me.attr('data-col');
+                        //LIGNE DU @
+                        let y = me.attr('data-row');
+
+                        // if(!this.isWall(go))
+                        this.move(me, this.getNextCase(direction,x,y),direction);
+                    }
+
+
+                }
+
+                let monTab;
+                let count = 0;
+
+                //BOUTONS DES NIVEAUX --------------------------------------------------------
+                for(let leevel in levels.levels)
+                {
+
+                    $("<button />")
+                        .append(`niveau ${++count}`)
+                        .appendTo('#mesboutons')
+                        .attr('id',`niv${count}`);
+
+                    $(`#niv${count}`).on('click', function(){
+                        $('#letab').remove();
+                        monTab = new Tableau(levels.levels[leevel].cells,"#level");
+                        monTab.creationTableau();
+                    });
+                }
+                // --------------------------------------------------------------------
+                // EVENEMENT KEYPRESS
+                $('body').keypress(function(e) {
+                    monTab.modifierTab(e.key);
+                });
+            })
+
+        </script>
+
+    </head>
+    <body>
+        <h1> Hello Word</h1>
+        <div id="mesboutons"></div>
+
+
+
+
+
+    </body>
+</html>
