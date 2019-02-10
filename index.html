@@ -8,7 +8,7 @@
         <script>
 
             $(document).ready(function(){
-                $('body').append(
+                $('body').css('background-color','DarkSlateGray').append(
                     $("<div />").attr('id','level')
                 );
                 class Tableau {
@@ -22,7 +22,14 @@
 
                     creationTableau(){
 
-                        let montableau = $("<div />").attr('id','letab');
+                        let montableau = $("<div />").attr('id','letab').css(
+                            {
+                                'text-align':'center',
+                                'margin' : 'auto',
+                                'margin-top':'10%',
+                                'padding' : 'auto'
+                            }
+                        );
 
                         montableau.appendTo(this.destination);
 
@@ -34,6 +41,17 @@
                             //TRAITEMENT DES CASES
                             for(let o = 0; o < this.niveau[i].length; o++) {
                                 let macellule = $("<div />");
+                                macellule.append(this.niveau[i][o]).css({
+                                    'background-color': 'black',
+                                    'color': 'white',
+                                    'text-align': 'center',
+                                    'vertical-align' : 'middle',
+                                    'display': 'inline-block',
+                                    'margin' : 'auto',
+                                    'padding' : '1% 1% 0 1%',
+                                    'width' : '40px',
+                                    'height' : '40px',
+                                });
                                 if(this.niveau[i][o] === '@'){
                                     // macellule.attr('id', 'moi');
                                     macellule.attr({
@@ -56,14 +74,17 @@
                                         'data-row':i,
                                         'data-col':o,
                                         'data-type':'destination'
-                                    });
+                                    }).css({
+                                        'background-color':'DimGrey',
+                                    })
+
                                 }
                                 else if(this.niveau[i][o] === '#'){
                                     macellule.attr({
                                         'data-row':i,
                                         'data-col':o,
                                         'data-type':'wall'
-                                    });
+                                    }).css('background-color','LightSlateGray');
                                 }
                                 else{
                                     macellule.attr({
@@ -72,18 +93,7 @@
                                         'data-type':'nothing'
                                     });
                                 }
-                                macellule.append(this.niveau[i][o]).css({
-                                    'background-color': 'black',
-                                    'color': 'white',
-                                    'text-align': 'center',
-                                    'vertical-align' : 'middle',
-                                    'display': 'inline-block',
-                                    'margin' : '0',
-                                    'padding' : '0',
-                                    'width' : '40px',
-                                    'height' : '40px',
-                                    'border' : 'red 5px solid'
-                                });
+
                                 //macellule.appendTo(maligne);
                                 maligne.append(macellule);
                             }
