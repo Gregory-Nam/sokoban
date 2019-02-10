@@ -16,12 +16,12 @@
                         this.niveau = niveau;
                         this.destination = destination;
                         this.hauteur = this.niveau.length;
-                        // this.x = 0;
-                        // this.y= 0;
+                        this.score = 0;
                     }
 
                     creationTableau(){
-
+                        $('#level').append(
+                            $('<h2/>').html("SCORE : " + this.score));
                         let montableau = $("<div />").attr('id','letab').css(
                             {
                                 'text-align':'center',
@@ -65,7 +65,8 @@
                                     macellule.attr({
                                         'data-row':i,
                                         'data-col':o,
-                                        'data-type':'rock'
+                                        'data-type':'rock',
+                                        'data-destination':'false'
                                     });
                                 }
                                 else if(this.niveau[i][o] === '.')
@@ -73,7 +74,8 @@
                                     macellule.attr({
                                         'data-row':i,
                                         'data-col':o,
-                                        'data-type':'destination'
+                                        'data-type':'destination',
+                                        'data-actual':'destination',
                                     }).css({
                                         'background-color':'DimGrey',
                                     })
@@ -111,15 +113,27 @@
                         return destination.attr('data-type') === 'nothing';
                     }
 
+                    isDestination(destination){
+                        return destination.attr('data-actual') === 'destination'
+                    }
+
 
 
                     move(current, destination, direction)
                     {
+
                         if(this.isNothing(destination))
                         {
-                            destination.html(current.html()).attr('data-type',current.attr('data-type'));
 
-                            current.attr('data-type','nothing').html("");
+                            if(this.isDestination(current)) {
+                                destination.html(current.html()).attr('data-type', current.attr('data-type'));
+                                current.attr('data-type', 'destination').html(".");
+                            }
+
+                            else {
+                                destination.html(current.html()).attr('data-type',current.attr('data-type'));
+                                current.attr('data-type','nothing').html("");
+                            }
                         }
                         else if(this.isRock(destination))
                         {
@@ -131,10 +145,26 @@
                                 this.move(destination,nextcase,direction);
                                 destination.html(current.html()).attr('data-type',current.attr('data-type'));
                                 current.attr('data-type','nothing').html("");
-
-
-
                             }
+                            if(this.isDestination(current))
+                            {
+                                current.attr('data-type', 'destination').html(".");
+                            }
+                        }
+                        else if(this.isDestination(destination))
+                        {
+                            if(this.isDestination(current))
+                            {
+                                destination.html(current.html()).attr('data-type', current.attr('data-type'));
+                                current.attr('data-type', 'destination').html(".");
+                            }
+                            else
+                            {
+                                destination.html(current.html()).attr( {'data-type': current.attr('data-type')});
+
+                                current.attr('data-type','nothing').html("");
+                            }
+
                         }
 
                     }
