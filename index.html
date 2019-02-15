@@ -66,7 +66,6 @@
                                         'data-row':i,
                                         'data-col':o,
                                         'data-type':'rock',
-                                        'data-destination':'false'
                                     });
                                 }
                                 else if(this.niveau[i][o] === '.')
@@ -76,6 +75,7 @@
                                         'data-col':o,
                                         'data-type':'destination',
                                         'data-actual':'destination',
+                                        'data-scored':'false'
                                     }).css({
                                         'background-color':'DimGrey',
                                     })
@@ -145,11 +145,17 @@
                                 this.move(destination,nextcase,direction);
                                 destination.html(current.html()).attr('data-type',current.attr('data-type'));
                                 current.attr('data-type','nothing').html("");
+                                if(this.isDestination(current))
+                                {
+                                    current.attr('data-type', 'destination').html(".");
+                                }
                             }
-                            if(this.isDestination(current))
-                            {
-                                current.attr('data-type', 'destination').html(".");
+                            else if(this.isDestination(nextcase)){
+                                this.move(destination,nextcase,direction);
+                                destination.html(current.html()).attr('data-type',current.attr('data-type'));
+                                current.attr('data-type','nothing').html("");
                             }
+
                         }
                         else if(this.isDestination(destination))
                         {
@@ -165,6 +171,11 @@
                                 current.attr('data-type','nothing').html("");
                             }
 
+                        }
+                        if(destination.attr('data-type') === 'rock' && destination.attr('data-actual') === 'destination' && destination.attr('data-scored') === 'false')
+                        {
+                            destination.attr('data-scored', 'true');
+                            $('h2','#level').html("SCORE : "+ ++this.score);
                         }
 
                     }
