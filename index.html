@@ -17,11 +17,13 @@
                         this.destination = destination;
                         this.hauteur = this.niveau.length;
                         this.score = 0;
+                        this.total_balls = 0;
                     }
 
-                    creationTableau(){
+                    creationTableau(leniveau){
+                        this.total_balls = levels.levels[leniveau].total_balls;
                         $('#level').append(
-                            $('<h2/>').html("SCORE : " + this.score));
+                            $('<h2/>').html("SCORE : " + this.score + "/" + this.total_balls ).attr('id','lescore'));
                         let montableau = $("<div />").attr('id','letab').css(
                             {
                                 'text-align':'center',
@@ -39,7 +41,7 @@
                             maligne.appendTo(montableau);
 
                             //TRAITEMENT DES CASES
-                            for(let o = 0; o < this.niveau[i].length; o++) {
+                            for(let o = 0; o < levels.levels[leniveau].width; o++) {
                                 let macellule = $("<div />");
                                 macellule.append(this.niveau[i][o]).css({
                                     'background-color': 'black',
@@ -76,6 +78,7 @@
                                         'data-type':'destination',
                                         'data-actual':'destination',
                                         'data-scored':'false'
+
                                     }).css({
                                         'background-color':'DimGrey',
                                     })
@@ -117,29 +120,51 @@
                         return destination.attr('data-actual') === 'destination'
                     }
 
+                    scored(current, destination)
+                    {
+                        console.log(current.attr('data-actual'));
+                        if(destination.attr('data-type') === 'rock' && destination.attr('data-actual') === 'destination' && destination.attr('data-scored') === 'false'
+                           && !current.attr("data-actual"))
+                        {
+                            destination.attr('data-scored', 'true');
+                            $('h2','#level').html("SCORE : "+ ++this.score + "/" + this.total_balls);
+                        }
+                        else if(current.attr('data-actual') && !destination.attr('data-actual'))
+                        {
+                            current.attr('data-scored', 'false');
+                            $('h2','#level').html("SCORE : "+ --this.score + "/" + this.total_balls);
+                        }
+                        else if(destination.attr('data-actual')){
+                            current.attr('data-scored','false');
+                            destination.attr('data-scored','true');
+                            console.log('bite');
+                        }
 
+                    }
 
                     move(current, destination, direction)
                     {
 
+                        // Deplacement vers une case vide
                         if(this.isNothing(destination))
                         {
-
+                            // Gestion des cases vides (destination ou chemin)
                             if(this.isDestination(current)) {
                                 destination.html(current.html()).attr('data-type', current.attr('data-type'));
                                 current.attr('data-type', 'destination').html(".");
                             }
-
                             else {
                                 destination.html(current.html()).attr('data-type',current.attr('data-type'));
                                 current.attr('data-type','nothing').html("");
                             }
                         }
+                        //Deplacement si il y a une pierre sur la direction
                         else if(this.isRock(destination))
                         {
-
+                            //Stockage de la case suivante de la case destination
                             let nextcase = this.getNextCase(direction,this.getXcase(destination),this.getyCase(destination));
-                            console.log(nextcase);
+                            //Verification si la case suivante de la destination est vide ou non
+                            //deplacement impossible si deux pierres cote a cote
                             if(this.isNothing(nextcase))
                             {
                                 this.move(destination,nextcase,direction);
@@ -149,17 +174,26 @@
                                 {
                                     current.attr('data-type', 'destination').html(".");
                                 }
+                                this.scored(destination, nextcase);
                             }
-                            else if(this.isDestination(nextcase)){
+                            else if(this.isDestination(nextcase) && !this.isRock(nextcase)){
+
                                 this.move(destination,nextcase,direction);
                                 destination.html(current.html()).attr('data-type',current.attr('data-type'));
                                 current.attr('data-type','nothing').html("");
+                                if(this.isDestination(current))
+                                {
+                                    current.attr('data-type', 'destination').html(".");
+                                }
+                                this.scored(destination, nextcase);
                             }
 
                         }
+                        //Deplacement si la destination est une case objectif
                         else if(this.isDestination(destination))
                         {
-                            if(this.isDestination(current))
+                            let nextcase = this.getNextCase(direction, this.getXcase(destination), this.getyCase(destination));
+                            if(this.isDestination(current) && nextcase.attr('data-type') !== 'rock')
                             {
                                 destination.html(current.html()).attr('data-type', current.attr('data-type'));
                                 current.attr('data-type', 'destination').html(".");
@@ -172,11 +206,8 @@
                             }
 
                         }
-                        if(destination.attr('data-type') === 'rock' && destination.attr('data-actual') === 'destination' && destination.attr('data-scored') === 'false')
-                        {
-                            destination.attr('data-scored', 'true');
-                            $('h2','#level').html("SCORE : "+ ++this.score);
-                        }
+
+
 
                     }
 
@@ -237,8 +268,9 @@
 
                     $(`#niv${count}`).on('click', function(){
                         $('#letab').remove();
+                        $('#lescore').remove();
                         monTab = new Tableau(levels.levels[leevel].cells,"#level");
-                        monTab.creationTableau();
+                        monTab.creationTableau(leevel);
                     });
                 }
                 // --------------------------------------------------------------------
